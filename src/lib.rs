@@ -6,6 +6,7 @@ use std::fmt::Display;
 
 pub struct Decomposition {
     bits: Vec<bool>,
+    // the exponent of the first stored bit
     starting_exponent: i32,
 }
 
@@ -19,13 +20,17 @@ impl Display for Decomposition {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         let mut string = String::new();
 
-        (self.starting_exponent..0)
-            .map(|_| &false)
+        // in case the starting exponent is less than 0, prepend zeros
+        (self.starting_exponent..0).map(|_| &false)
+            // the stored bits
             .chain(&self.bits)
-            .chain((0..(self.starting_exponent - self.bits.len() as i32 + 1)).map(|_| &false))
+            // in case only bits of exponents greater than 0 are stored, append zeros
+            .chain((0..self.starting_exponent - self.bits.len() as i32 + 1).map(|_| &false))
             .enumerate()
+            // map the index to the exponent
             .map(|(index, &bit)| (max(0, self.starting_exponent) - index as i32, bit))
             .for_each(|(exponent, bit)| {
+                // ignore leading zeros
                 if !bit && exponent > 0 && string.is_empty() {
                     return;
                 }
@@ -48,8 +53,15 @@ pub fn decompose(target: f64) -> Decomposition {
 
     loop {
         let result_new = result + (-2f64).powi(exponent);
+        /* the sum of all powers of -2 that have
+        - lower exponents and
+        - opposite sign to
+        the current power, i.e. (-2) ^ `exponent`,
+        which is the sum of all terms in the geometric progression:
+        a1 = (-2) ^ (`exponent` - 1); r = 1/4 */
         let opposite_sign_sum = (-2f64).powi(exponent - 1) * 4f64 / 3f64;
 
+        // whether it is possible to reach the target when including the current power
         let target_possible = if exponent % 2 == 0 {
             result_new + opposite_sign_sum <= target
         } else {
@@ -73,9 +85,15 @@ pub fn decompose(target: f64) -> Decomposition {
     decomposition
 }
 
+/* the lowest integer to which -2 raised is
+   - greater, if the target is positive, or
+   - lower, if the target is negative,
+   than or equal to the target */
 fn find_starting_exponent(target: f64) -> i32 {
+    // the absolute value is needed in order to calculate the logarithm
     let mut starting_exponent = target.abs().log2().ceil() as i32;
 
+    // tweak the exponent in case the power's sign doesn't match the target's
     if (target < 0_f64 && starting_exponent % 2 == 0)
         || (target > 0_f64 && starting_exponent % 2 != 0) {
         starting_exponent += 1;
