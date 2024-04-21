@@ -90,6 +90,10 @@ pub fn decompose(target: f64) -> Decomposition {
    - lower, if the target is negative,
    than or equal to the target */
 fn find_starting_exponent(target: f64) -> i32 {
+    if target == 0f64 { 
+        return 0;
+    }
+    
     // the absolute value is needed in order to calculate the logarithm
     let mut starting_exponent = target.abs().log2().ceil() as i32;
 
