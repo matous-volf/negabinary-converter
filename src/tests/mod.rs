@@ -20,6 +20,7 @@ fn test_positive_decimals() {
     assert_eq!(decompose(31.5).to_string(), "1100000.1");
 }
 
+#[test]
 fn test_negative_integers() {
     assert_eq!(decompose(-2f64).to_string(), "10");
     assert_eq!(decompose(-10f64).to_string(), "1010");
@@ -33,4 +34,9 @@ fn test_negative_decimals() {
     assert_eq!(decompose(-0.625).to_string(), "0.101");
     assert_eq!(decompose(-0.375).to_string(), "0.111");
     assert_eq!(decompose(-34.875).to_string(), "101101.011");
+}
+
+#[test]
+fn test_zero() {
+    assert_eq!(decompose(0f64).to_string(), "0");
 }
